@@ -6,25 +6,6 @@ require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,57 +15,63 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(186));
-const wait_1 = __nccwpck_require__(817);
+const core_1 = __importDefault(__nccwpck_require__(186));
+const fs_1 = __nccwpck_require__(747);
+const path_1 = __importDefault(__nccwpck_require__(622));
+function getAllFilenames(dirPath, fileArr) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const files = yield fs_1.promises.readdir(dirPath);
+        for (const file of files) {
+            const filePath = path_1.default.join(dirPath, file);
+            const stats = yield fs_1.promises.stat(filePath);
+            if (stats.isDirectory() && !filePath.endsWith('node_modules')) {
+                yield getAllFilenames(filePath, fileArr);
+            }
+            else {
+                fileArr.push(filePath);
+            }
+        }
+        return fileArr;
+    });
+}
+function countByExtension(filenames) {
+    return filenames.reduce((counts, filename) => {
+        const extension = path_1.default.extname(filename);
+        return Object.assign(Object.assign({}, counts), { [extension]: (counts[extension] || 0) + 1 });
+    }, {});
+}
+function sumValues(counts, extensions) {
+    let sum = 0;
+    for (const extension of extensions) {
+        if (counts[extension]) {
+            sum += counts[extension];
+        }
+    }
+    return sum;
+}
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const ms = core.getInput('milliseconds');
-            core.debug(`Waiting ${ms} milliseconds ...`); // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
-            core.debug(new Date().toTimeString());
-            yield (0, wait_1.wait)(parseInt(ms, 10));
-            core.debug(new Date().toTimeString());
-            core.setOutput('time', new Date().toTimeString());
+            const arrayOfFiles = [];
+            yield getAllFilenames(process.env.GITHUB_WORKSPACE || '/', arrayOfFiles);
+            const counts = countByExtension(arrayOfFiles);
+            core_1.default.setOutput('files-by-extension', counts);
+            const tsCount = sumValues(counts, ['.ts', '.tsx']);
+            const jsCount = sumValues(counts, ['.js', '.jsx']);
+            const total = tsCount + jsCount;
+            core_1.default.setOutput('ts-percent', Math.floor((tsCount / total) * 100));
         }
         catch (error) {
             if (error instanceof Error)
-                core.setFailed(error.message);
+                core_1.default.setFailed(error.message);
         }
     });
 }
 run();
-
-
-/***/ }),
-
-/***/ 817:
-/***/ (function(__unused_webpack_module, exports) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.wait = void 0;
-function wait(milliseconds) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(resolve => {
-            if (isNaN(milliseconds)) {
-                throw new Error('milliseconds not a number');
-            }
-            setTimeout(() => resolve('done!'), milliseconds);
-        });
-    });
-}
-exports.wait = wait;
 
 
 /***/ }),
