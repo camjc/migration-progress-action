@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
+import * as fs from 'fs/promises'
 import * as path from 'path'
-import {promises as fs} from 'fs'
 
 async function getAllFilenames(
   dirPath: string,

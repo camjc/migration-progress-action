@@ -36,14 +36,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
+const fs = __importStar(__nccwpck_require__(225));
 const path = __importStar(__nccwpck_require__(622));
-const fs_1 = __nccwpck_require__(747);
 function getAllFilenames(dirPath, fileArr) {
     return __awaiter(this, void 0, void 0, function* () {
-        const files = yield fs_1.promises.readdir(dirPath);
+        const files = yield fs.readdir(dirPath);
         for (const file of files) {
             const filePath = path.join(dirPath, file);
-            const stats = yield fs_1.promises.stat(filePath);
+            const stats = yield fs.stat(filePath);
             if (stats.isDirectory() && !filePath.endsWith('node_modules')) {
                 yield getAllFilenames(filePath, fileArr);
             }
@@ -2808,6 +2808,14 @@ module.exports = require("events");
 
 "use strict";
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ 225:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("fs/promises");
 
 /***/ }),
 
