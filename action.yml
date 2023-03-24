@@ -1,4 +1,4 @@
-name: 'JS to TS migration tracker'
+name: 'JS to TS migration progress tracker'
 description: 'See how many JS vs TS files there are in this repo'
 outputs:
   files-by-extension:
